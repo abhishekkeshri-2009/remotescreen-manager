@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id       String  @id @default(cuid())
+  name     String
+  api_key  String  @unique
+  users    User[]
+  apps     App[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  company   Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model App {
+  id         String   @id @default(cuid())
+  name       String
+  company    Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  company_id String
+  screens    Screen[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([company_id])
+}
+
+model Screen {
+  id          String  @id @default(cuid())
+  screen_name String
+  layout_json Json
+  published   Boolean @default(false)
+
+  app    App    @relation(fields: [app_id], references: [id], onDelete: Cascade)
+  app_id String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([app_id])
+  @@unique([app_id, screen_name])
+}
+

@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: rsm_db
+    environment:
+      POSTGRES_USER: rsm
+      POSTGRES_PASSWORD: rsm
+      POSTGRES_DB: rsm
+    ports:
+      - "5432:5432"
+    volumes:
+      - rsm_pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: rsm_backend
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgresql://rsm:rsm@db:5432/rsm?schema=public
+      JWT_SECRET: dev_super_secret_change_me
+      JWT_EXPIRES_IN: 7d
+      CORS_ORIGIN: http://localhost:5173
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:3000
+    container_name: rsm_frontend
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"
+
+volumes:
+  rsm_pgdata:
+
