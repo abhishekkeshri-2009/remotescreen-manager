@@ -31,11 +31,10 @@ services:
     dockerfilePath: ./frontend/Dockerfile
     autoDeploy: true
     envVars:
+      # Set this to the public URL of rsm-backend AFTER the first deploy,
+      # e.g. https://rsm-backend-xxxx.onrender.com
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: rsm-backend
-          property: url
+        value: ""
 
 databases:
   - name: rsm-db
